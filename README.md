@@ -10,8 +10,9 @@ stages.
 
 - FastAPI calculation API using exact decimal arithmetic
 - PostgreSQL storage for manual price observations and source-run audit records
+- Guest trip calculator UI in Russian, English, and German
 - Docker Compose development environment and Alembic migrations
-- Frontend, user accounts, and external price providers are planned for later stages
+- User accounts and external route/price providers are planned for later stages
 
 ## Requirements
 
@@ -31,8 +32,9 @@ docker compose up --build -d
 docker compose ps
 ```
 
-The API is available at `http://localhost:8000`; its interactive schema is at
-`http://localhost:8000/docs`. Migrations run when the API container starts.
+The app is available at `http://localhost:8080`; the API is proxied through the
+frontend container and its interactive schema is at
+`http://localhost:8080/api/docs`. Migrations run when the API container starts.
 Stop the services with `docker compose down`. Persisted local database data is
 kept in the `postgres_data` volume.
 
@@ -43,6 +45,12 @@ provided CHF/liter price, optional extra costs, and 1–8 passengers. It returns
 fuel liters, a cost breakdown, each passenger's contribution rounded up to a
 whole CHF, and the resulting rounding surplus. The price must be in the
 configured sanity range of CHF 1.00–3.50 per liter.
+
+The guest calculator calls this endpoint without login. Distance, vehicle
+consumption, and price are entered manually. Optional origin and destination
+fields create universal driving links for Google Maps and Apple Maps; they do
+not geocode addresses or determine the distance. The selected language is
+chosen from the browser locale on first visit and saved in local storage.
 
 ## Manual fuel prices
 
@@ -81,14 +89,19 @@ Never commit database dumps or raw downloaded source data.
 
 ## Development checks
 
-Install Python 3.12+ and pre-commit. Gitleaks must also be installed for its
-configured pre-commit hook. Docker is required for Compose validation and image
-builds.
+Install Python 3.12+, Node.js 20+, and pre-commit. Gitleaks must also be
+installed for its configured pre-commit hook. Docker is required for Compose
+validation and image builds.
 
 ```sh
 cd backend
 python -m pip install pre-commit
 python -m pip install -e ".[dev]"
+cd ..
+cd frontend
+npm ci
+npm test
+npm run build
 cd ..
 pre-commit install
 pre-commit run --all-files
@@ -96,9 +109,8 @@ python -m pytest -q backend/tests
 POSTGRES_PASSWORD=ci-only docker compose config --quiet
 ```
 
-CI runs repository hooks, backend tests, PostgreSQL migrations, Compose
-validation, and a backend image build. Frontend checks will be added when the
-frontend is introduced.
+CI runs repository hooks, backend and frontend tests/builds, PostgreSQL
+migrations, Compose validation, and backend/frontend image builds.
 
 ## Data and licensing
 

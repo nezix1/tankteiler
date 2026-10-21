@@ -10,7 +10,7 @@ The frontend, user accounts, and external providers remain out of scope.
 
 ```mermaid
 flowchart LR
-  Browser[Vue 3 PWA, planned] --> API[FastAPI application]
+  Browser[Vue 3 guest UI, RU EN DE] --> API[FastAPI application]
   API --> Domain[Decimal calculation service]
   API --> DB[(PostgreSQL)]
   Admin[Operator] --> ManualAPI[Admin price endpoint]
@@ -19,13 +19,15 @@ flowchart LR
   Providers --> DB
 ```
 
-The calculation endpoint is stateless and accepts manual trip inputs. Manual
-price observations are stored in PostgreSQL with an associated source-run audit
-record. The write endpoint is disabled unless an administrator key is
-configured. Future user interfaces will provide Russian, English, and German
-translations; user-facing strings must not be hardcoded in components.
-Provider implementations will be behind interfaces so permitted data sources
-and routing engines can be replaced independently.
+The guest interface collects trip inputs and calls the stateless calculation
+endpoint. User-facing text is translated in locale message catalogs for
+Russian, English, and German. Language preference is initialized from the
+browser and persisted in local storage. Exact decimal inputs stay as strings
+until validated and are calculated by the backend. Manual price observations
+are stored in PostgreSQL with an associated source-run audit record. The write
+endpoint is disabled unless an administrator key is configured. Provider
+implementations will be behind interfaces so permitted data sources and
+routing engines can be replaced independently.
 
 ## Planned database
 
@@ -79,3 +81,6 @@ good value without making every calculation depend on an external request.
   secret; it is intended as a controlled fallback, not user authentication.
 - The current calculation API takes a manually supplied price and does not yet
   select a stored price automatically.
+- Route distance is entered manually; origin/destination fields only create
+  external map links. Geocoding and route calculation are not implemented yet.
+- The guest UI does not persist a calculation or share it by permanent link.
