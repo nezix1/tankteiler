@@ -21,4 +21,6 @@ jobs:
       - name: Run repository hooks
         run: pre-commit run --all-files
       - name: Validate Compose configuration
+        env:
+          POSTGRES_PASSWORD: ci-only
         run: docker compose config --quiet
