@@ -4,13 +4,19 @@ function localeTag(locale: string): string {
   return "ru-RU";
 }
 
+function formatInteger(value: bigint, locale: string): string {
+  return new Intl.NumberFormat(localeTag(locale), {
+    maximumFractionDigits: 0,
+  })
+    .format(value)
+    .replace(/[\u2019\u02bc]/g, "'");
+}
+
 export function formatDecimal(value: string, locale: string): string {
   const [whole, fraction = ""] = value.split(".");
   const trimmedFraction = fraction.replace(/0+$/, "");
   const localizedLocale = localeTag(locale);
-  const groupedWhole = new Intl.NumberFormat(localizedLocale, {
-    maximumFractionDigits: 0,
-  }).format(BigInt(whole));
+  const groupedWhole = formatInteger(BigInt(whole), locale);
   if (!trimmedFraction) return groupedWhole;
 
   const decimalSeparator = new Intl.NumberFormat(localizedLocale)
@@ -22,9 +28,7 @@ export function formatDecimal(value: string, locale: string): string {
 export function formatCurrency(value: string, locale: string): string {
   const [whole, fraction = ""] = value.split(".");
   const localizedLocale = localeTag(locale);
-  const groupedWhole = new Intl.NumberFormat(localizedLocale, {
-    maximumFractionDigits: 0,
-  }).format(BigInt(whole));
+  const groupedWhole = formatInteger(BigInt(whole), locale);
   const formattedParts = new Intl.NumberFormat(localizedLocale, {
     style: "currency",
     currency: "CHF",
