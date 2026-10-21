@@ -1,0 +1,53 @@
+function localeTag(locale: string): string {
+  if (locale === "de") return "de-CH";
+  if (locale === "en") return "en-CH";
+  return "ru-RU";
+}
+
+function formatInteger(value: bigint, locale: string): string {
+  return new Intl.NumberFormat(localeTag(locale), {
+    maximumFractionDigits: 0,
+  })
+    .format(value)
+    .replace(/[\u2019\u02bc]/g, "'");
+}
+
+export function formatDecimal(value: string, locale: string): string {
+  const [whole, fraction = ""] = value.split(".");
+  const trimmedFraction = fraction.replace(/0+$/, "");
+  const localizedLocale = localeTag(locale);
+  const groupedWhole = formatInteger(BigInt(whole), locale);
+  if (!trimmedFraction) return groupedWhole;
+
+  const decimalSeparator = new Intl.NumberFormat(localizedLocale)
+    .formatToParts(1.1)
+    .find((part) => part.type === "decimal")?.value;
+  return `${groupedWhole}${decimalSeparator ?? "."}${trimmedFraction}`;
+}
+
+export function formatCurrency(value: string, locale: string): string {
+  const [whole, fraction = ""] = value.split(".");
+  const localizedLocale = localeTag(locale);
+  const groupedWhole = formatInteger(BigInt(whole), locale);
+  const formattedParts = new Intl.NumberFormat(localizedLocale, {
+    style: "currency",
+    currency: "CHF",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).formatToParts(0);
+  let insertedInteger = false;
+
+  return formattedParts
+    .map((part) => {
+      if (part.type === "integer") {
+        if (insertedInteger) return "";
+        insertedInteger = true;
+        return groupedWhole;
+      }
+      if (part.type === "fraction") {
+        return fraction.padEnd(2, "0").slice(0, 2);
+      }
+      return part.value;
+    })
+    .join("");
+}
