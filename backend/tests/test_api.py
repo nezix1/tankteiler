@@ -11,6 +11,15 @@ def test_health_check(client: TestClient) -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_openapi_docs_are_available_under_api_prefix(client: TestClient) -> None:
+    docs_response = client.get("/api/docs")
+    schema_response = client.get("/api/openapi.json")
+
+    assert docs_response.status_code == 200
+    assert schema_response.status_code == 200
+    assert schema_response.json()["info"]["title"] == "TankTeiler API"
+
+
 def test_calculate_trip_endpoint_returns_cost_breakdown(client: TestClient) -> None:
     response = client.post(
         "/api/v1/trips/calculate",
