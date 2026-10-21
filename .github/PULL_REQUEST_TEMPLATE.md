@@ -1,13 +1,13 @@
-## Что сделано
+## Summary
 
-<!-- Кратко опишите изменения -->
+<!-- Summarize the changes -->
 
-## Как проверить
+## How to test
 
-<!-- Команды или шаги проверки -->
+<!-- List commands or steps to verify the changes -->
 
-## Чек-лист
+## Checklist
 
-- [ ] Проверки CI пройдены
-- [ ] Документация обновлена, если требовалось
-- [ ] Секреты и реальные выгрузки данных не добавлены
+- [ ] CI checks pass
+- [ ] Documentation is updated where needed
+- [ ] No secrets or real source-data dumps are included

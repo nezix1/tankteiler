@@ -2,36 +2,47 @@
 
 ## Bootstrap scope
 
-This commit contains repository configuration and a PostgreSQL development
-service only. It intentionally has no application code or application
-containers. CI validates repository hygiene and the Compose configuration;
-application tests and image builds belong to the stages that introduce those
-applications.
+The current stage adds a FastAPI backend, calculation domain service, manual
+fuel-price entry, Alembic migrations, PostgreSQL storage, and backend tests.
+The frontend, user accounts, and external providers remain out of scope.
 
 ## Planned component overview
 
 ```mermaid
 flowchart LR
-  Browser[Vue 3 PWA] --> API[FastAPI application]
+  Browser[Vue 3 PWA, planned] --> API[FastAPI application]
+  API --> Domain[Decimal calculation service]
   API --> DB[(PostgreSQL)]
-  API --> Providers[Provider interfaces]
-  Scheduler[Daily scheduler process] --> Providers
-  Scheduler --> DB
+  Admin[Operator] --> ManualAPI[Admin price endpoint]
+  ManualAPI --> DB
+  Scheduler[Daily scheduler, planned] --> Providers[Provider interfaces, planned]
+  Providers --> DB
 ```
 
-The browser will use the API for guest trip calculations and, in a later stage,
-authenticated garage and refueling features. Provider implementations will be
-behind interfaces so permitted data sources and routing engines can be
-replaced independently. Scheduled data collection will be separate from
-interactive requests and will persist source runs and observations.
+The calculation endpoint is stateless and accepts manual trip inputs. Manual
+price observations are stored in PostgreSQL with an associated source-run audit
+record. The write endpoint is disabled unless an administrator key is
+configured. Future user interfaces will provide Russian, English, and German
+translations; user-facing strings must not be hardcoded in components.
+Provider implementations will be behind interfaces so permitted data sources
+and routing engines can be replaced independently.
 
 ## Planned database
 
-The initial schema will be designed alongside the backend and migrations. The
-planned entities include users, vehicles, data sources and source runs, fuel
-price observations, trips and waypoints, trip expenses, and later refuelings
-and fuel stations. Monetary and volume values will use exact decimal database
-types; timestamps will be stored in UTC.
+The initial migration creates:
+
+```mermaid
+erDiagram
+  DATA_SOURCES ||--o{ DATA_SOURCE_RUNS : records
+  DATA_SOURCES ||--o{ FUEL_PRICE_OBSERVATIONS : provides
+  DATA_SOURCE_RUNS ||--o{ FUEL_PRICE_OBSERVATIONS : accepts
+```
+
+`fuel_price_observations` stores a CHF price, fuel type, `valid_since`,
+`fetched_at`, and optional operator note. `data_source_runs` stores status,
+timestamps, record counts, and an error detail. Indices support finding runs
+per source and the latest observation per fuel type. Later migrations will add
+users, vehicles, trips, waypoints, expenses, refuelings, and stations.
 
 ## Decision records
 
@@ -64,3 +75,7 @@ good value without making every calculation depend on an external request.
   and discrepancies must be visible to users.
 - Public map and geocoding services have usage policies and rate limits that
   must be respected.
+- The manual administrator endpoint is protected by a shared environment
+  secret; it is intended as a controlled fallback, not user authentication.
+- The current calculation API takes a manually supplied price and does not yet
+  select a stored price automatically.

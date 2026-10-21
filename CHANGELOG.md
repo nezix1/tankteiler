@@ -9,7 +9,12 @@ and this project aims to follow [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Initial repository and development infrastructure.
+- FastAPI backend with Decimal trip-cost calculations and whole-franc
+  passenger-share rounding.
+- Alembic schema for fuel-price observations, data-source runs, and a manual
+  administrator source.
+- Protected manual fuel-price API, latest-price lookup, and operator seed CLI.
+- Backend test suite and CI test/image-build steps.
 
 ### Fixed
 
