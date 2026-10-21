@@ -19,7 +19,8 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        types_or: [yaml, json, markdown, html, css, scss, javascript, ts, tsx, vue]
+        types_or:
+          [yaml, json, markdown, html, css, scss, javascript, ts, tsx, vue]
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.24.2
     hooks:

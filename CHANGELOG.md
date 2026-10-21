@@ -10,3 +10,8 @@ and this project aims to follow [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Initial repository and development infrastructure.
+
+### Fixed
+
+- Format bootstrap files with Prettier so repository checks pass.
+- Provide a CI-only PostgreSQL password when validating the Compose configuration.
